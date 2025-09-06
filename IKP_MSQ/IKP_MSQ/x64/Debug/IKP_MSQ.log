@@ -1,0 +1,23 @@
+﻿  ConcreteMessageQueueService.cpp
+E:\Fakultet\IKP\IKP_MSQ\IKP_MSQ\concretemessagequeueservice.h(10,44): error C2504: 'MessageQueueService': base class undefined
+  (compiling source file 'ConcreteMessageQueueService.cpp')
+  
+E:\Fakultet\IKP\IKP_MSQ\IKP_MSQ\concretemessagequeueservice.h(16,7): error C3668: 'ConcreteMessageQueueService::SendMessageW': method with override specifier 'override' did not override any base class methods
+  (compiling source file 'ConcreteMessageQueueService.cpp')
+  
+E:\Fakultet\IKP\IKP_MSQ\IKP_MSQ\ConcreteMessageQueueService.cpp(9,38): error C2065: 'queuesMutex': undeclared identifier
+E:\Fakultet\IKP\IKP_MSQ\IKP_MSQ\ConcreteMessageQueueService.cpp(19,38): error C2065: 'queuesMutex': undeclared identifier
+E:\Fakultet\IKP\IKP_MSQ\IKP_MSQ\ConcreteMessageQueueService.cpp(29,38): error C2065: 'queuesMutex': undeclared identifier
+E:\Fakultet\IKP\IKP_MSQ\IKP_MSQ\ConcreteMessageQueueService.cpp(33,35): error C2039: 'ConfirmMessageDelivered': is not a member of 'ConcreteMessageQueueService'
+      E:\Fakultet\IKP\IKP_MSQ\IKP_MSQ\concretemessagequeueservice.h(10,7):
+      see declaration of 'ConcreteMessageQueueService'
+  
+E:\Fakultet\IKP\IKP_MSQ\IKP_MSQ\ConcreteMessageQueueService.cpp(34,38): error C2065: 'queuesMutex': undeclared identifier
+E:\Fakultet\IKP\IKP_MSQ\IKP_MSQ\ConcreteMessageQueueService.cpp(36,15): error C2065: 'queues': undeclared identifier
+E:\Fakultet\IKP\IKP_MSQ\IKP_MSQ\ConcreteMessageQueueService.cpp(37,9): error C3536: 'it': cannot be used before it is initialized
+E:\Fakultet\IKP\IKP_MSQ\IKP_MSQ\ConcreteMessageQueueService.cpp(37,15): error C2065: 'queues': undeclared identifier
+E:\Fakultet\IKP\IKP_MSQ\IKP_MSQ\ConcreteMessageQueueService.cpp(44,13): error C3536: 'queue': cannot be used before it is initialized
+  dllmain.cpp
+  pch.cpp
+  ThreadPool.cpp
+  Generating Code...

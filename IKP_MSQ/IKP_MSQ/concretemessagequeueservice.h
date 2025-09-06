@@ -9,18 +9,16 @@
 
 class ConcreteMessageQueueService : public MessageQueueService {
 private:
-	std::unordered_map < std::string, std::shared_ptr<MessageQueue<std::string>>> queues;
-
-
+    std::unordered_map<std::string, std::shared_ptr<MessageQueue<std::string>>> queues;
+    std::mutex queuesMutex;
 public:
-	void SendMessage(const std::string& queueName, const void* message, int messageSize) override;
+    void SendMessage(const std::string& queueName, const void* message, int messageSize) override;
+    std::shared_ptr<MessageQueue<std::string>> GetQueue(const std::string& queueName);
+    void CreateQueue(const std::string& queueName);
 
-	// pristup redu prema imenu
-	std::shared_ptr<MessageQueue<std::string>> GetQueue(const std::string& queueName);
-
-	// Kreira red ako ne postoji
-	void CreateQueue(const std::string& queueName);
+    bool ConfirmMessageDelivered(const std::string& queueName, const std::string& message); // nova metoda
 };
+
 
 #endif // CONCRETE_MESSAGE_QUEUE_SERVICE_H
 
