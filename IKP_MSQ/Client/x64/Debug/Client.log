@@ -1,1 +1,28 @@
-﻿
+﻿  Client.cpp
+E:\Fakultet\IKP\IKP_MSQ\Client\Client.cpp(45,61): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+E:\Fakultet\IKP\IKP_MSQ\Client\Client.cpp(53,73): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+E:\Fakultet\IKP\IKP_MSQ\Client\Client.cpp(78,13): error C2374: 'globalShutdownFlag': redefinition; multiple initialization
+      E:\Fakultet\IKP\IKP_MSQ\Client\Client.cpp(16,13):
+      see declaration of 'globalShutdownFlag'
+  
+E:\Fakultet\IKP\IKP_MSQ\Client\Client.cpp(78,13): error C2086: 'std::string globalShutdownFlag': redefinition
+      E:\Fakultet\IKP\IKP_MSQ\Client\Client.cpp(16,13):
+      see declaration of 'globalShutdownFlag'
+  
+E:\Fakultet\IKP\IKP_MSQ\Client\Client.cpp(79,29): error C2086: 'ConcreteMessageQueueService messageQueueService': redefinition
+      E:\Fakultet\IKP\IKP_MSQ\Client\Client.cpp(17,29):
+      see declaration of 'messageQueueService'
+  
+E:\Fakultet\IKP\IKP_MSQ\Client\Client.cpp(81,6): error C2084: function 'void receiveMessages(SOCKET)' already has a body
+      E:\Fakultet\IKP\IKP_MSQ\Client\Client.cpp(19,6):
+      see previous definition of 'receiveMessages'
+  
+E:\Fakultet\IKP\IKP_MSQ\Client\Client.cpp(99,6): error C2084: function 'void sendMessages(SOCKET,const std::string &)' already has a body
+      E:\Fakultet\IKP\IKP_MSQ\Client\Client.cpp(38,6):
+      see previous definition of 'sendMessages'
+  
+E:\Fakultet\IKP\IKP_MSQ\Client\Client.cpp(105,61): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+E:\Fakultet\IKP\IKP_MSQ\Client\Client.cpp(111,73): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+E:\Fakultet\IKP\IKP_MSQ\Client\Client.cpp(165,49): error C2264: 'sendMessages': error in function definition or declaration; function not called
+E:\Fakultet\IKP\IKP_MSQ\Client\Client.cpp(160,26): error C4996: 'gethostbyname': Use getaddrinfo() or GetAddrInfoW() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+E:\Fakultet\IKP\IKP_MSQ\Client\Client.cpp(161,24): error C4996: 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings

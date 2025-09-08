@@ -1,1 +1,6 @@
-﻿
+﻿  ConcreteMessageQueueService.cpp
+  dllmain.cpp
+  pch.cpp
+  ThreadPool.cpp
+  Generating Code...
+  IKP_MSQ.vcxproj -> E:\Fakultet\IKP\IKP_MSQ\x64\Debug\IKP_MSQ.lib

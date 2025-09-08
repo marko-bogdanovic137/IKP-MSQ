@@ -1,6 +1,12 @@
-#include "pch.h"
-#include "Server.h"
+#include "../IKP_MSQ/pch.h"
+#include "server.h"
 #include <iostream>
+
+#define SERVER1_IP "127.0.0.1"
+#define SERVER1_PORT 8080
+
+#define SERVER2_IP "127.0.0.1"
+#define SERVER2_PORT 8082
 
 Server::Server(const std::string& serverAddress, int port, bool isClient, size_t threadPoolSize)
     : serverAddress(serverAddress),
@@ -81,8 +87,8 @@ void Server::handleClientConnection() {
 
     std::cout << "Client connected." << std::endl;
 
+    threadPool.enqueue([this, clientSocket]() { receiveFromClient(clientSocket); });
     threadPool.enqueue([this, clientSocket]() { forwardToClient(clientSocket); });
-    threadPool.enqueue([this, clientSocket]() { receiveFromOtherServer(clientSocket); });
 
     while (running) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -93,37 +99,95 @@ void Server::handleClientConnection() {
     WSACleanup();
 }
 
+void Server::receiveFromClient(SOCKET clientSocket) {
+    char buffer[1024];
+    sockaddr_in addr;
+    int addrLen = sizeof(addr);
+    getpeername(clientSocket, (sockaddr*)&addr, &addrLen);
+    std::string clientIp = inet_ntoa(addr.sin_addr);
+
+    while (running) {
+        int bytesReceived = recv(clientSocket, buffer, sizeof(buffer), 0);
+        if (bytesReceived <= 0) {
+            std::cerr << "Client disconnected or error." << std::endl;
+            break;
+        }
+        buffer[bytesReceived] = '\0';
+        std::string message(buffer);
+
+        std::string messageWithIp = clientIp + ": " + message;
+        std::cout << "[CLIENT] " << messageWithIp << std::endl;
+     
+        sendingQueue.enqueue(messageWithIp);
+        
+        SendToQueue("OtherServerQueue", messageWithIp);
+    }
+}
+
+
+
 void Server::handleServerConnection() {
     // Placeholder – ovde ide logika za konekciju na drugi server
     std::cout << "Connecting to other server..." << std::endl;
 }
 
-void Server::receiveFromOtherServer(SOCKET otherServerSocket) {
-    char buffer[1024];
+void Server::forwardToClient(SOCKET clientSocket) {
     while (running) {
-        int bytesReceived = recv(otherServerSocket, buffer, sizeof(buffer), 0);
-        if (bytesReceived <= 0) {
-            std::cerr << "Connection closed or error." << std::endl;
-            break;
+        while (!sendingQueue.isEmpty()) {
+            std::string message = sendingQueue.dequeue();
+            int bytesSent = send(clientSocket, message.c_str(), message.size(), 0);
+            if (bytesSent == SOCKET_ERROR) {
+                std::cerr << "Error sending message to client: " << WSAGetLastError() << std::endl;
+                return;
+            }
+            std::cout << "Forwarded message to client: " << message << std::endl;
         }
-        buffer[bytesReceived] = '\0';
-
-        std::string message(buffer);
-        SendToQueue("incoming", message);
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }
 
-void Server::forwardToClient(SOCKET clientSocket) {
-    auto queue = messageQueueService.GetQueue("incoming");
-    if (!queue) return;
+int main() {
+    std::cout << "Odaberite server: 1 ili 2? ";
+    int choice;
+    std::cin >> choice;
+    std::cin.ignore(); // uklanja \n sa ulaza
 
-    while (running) {
-        std::string message = queue->dequeue();
-        if (send(clientSocket, message.c_str(), static_cast<int>(message.size()), 0) == SOCKET_ERROR) {
-            std::cerr << "Failed to forward message to client." << std::endl;
-        }
-        else {
-            messageQueueService.ConfirmMessageDelivered("incoming", message);
+    std::string ip;
+    int port;
+    bool isClient = false; 
+
+    if (choice == 1) {
+        ip = SERVER1_IP;
+        port = SERVER1_PORT;
+    }
+    else if (choice == 2) {
+        ip = SERVER2_IP;
+        port = SERVER2_PORT;
+        isClient = true; 
+    }
+    else {
+        std::cerr << "Nepoznata opcija." << std::endl;
+        return 1;
+    }
+
+    try {
+        Server server(ip, port, isClient);
+        server.start();
+
+        std::cout << "Server radi. Ukucajte 'exit' da zaustavite server." << std::endl;
+        std::string command;
+        while (true) {
+            std::getline(std::cin, command);
+            if (command == "exit") {
+                server.stop();
+                break;
+            }
         }
     }
+    catch (const std::exception& ex) {
+        std::cerr << "Greška: " << ex.what() << std::endl;
+    }
+
+    std::cout << "Server je zaustavljen." << std::endl;
+    return 0;
 }
