@@ -1,4 +1,4 @@
-#ifndef SERVER_H
+﻿#ifndef SERVER_H
 #define SERVER_H
 
 #include <winsock2.h>
@@ -6,6 +6,9 @@
 #include <thread>
 #include <string>
 #include <vector>
+#include <unordered_map>
+#include <mutex>
+#include <atomic>
 #include "../IKP_MSQ/MessageQueue.h"
 #include "../IKP_MSQ/concretemessagequeueservice.h"
 #include "../IKP_MSQ/ThreadPool.h"
@@ -23,30 +26,34 @@ private:
 
     ConcreteMessageQueueService messageQueueService;
 
+    MessageQueue<std::string> sendingQueue;     // Red za slanje poruka primljenih od klijenta (lokalni klijenti)
+    MessageQueue<std::string> serverQueue;      // Red za slanje poruka drugom serveru
 
-    MessageQueue<std::string> sendingQueue;     // Red za slanje poruka primljenih od klijenta
-    MessageQueue<std::string> receivingQueue;  // Red za obradu primljenih poruka
-    MessageQueue<std::string> clientQueue; // poruke koje idu klijentima
-    MessageQueue<std::string> serverQueue; // poruke koje idu drugom serveru
+    // ACK / pending map za reliable delivery
+    std::mutex pendingMutex;
+    std::unordered_map<std::string, int> pendingAcks; // msgId -> attempts (present => waiting ACK)
+    std::atomic<unsigned long long> msgCounter;
 
-
+    // Socket-handling
     void receiveFromServer(SOCKET serverSocket);   // prima poruke od drugog servera
-    void forwardToServer(SOCKET serverSocket);     // �alje poruke drugom serveru
-    void handleClientConnection();                                                      // Metoda za rukovanje klijentom
-    void handleServerConnection();                                                      // Metoda za rukovanje serverom
-    void receiveFromClient(SOCKET clientSocket);                                        // Metoda za primanje poruke od klijenta od strane servera
-    void forwardToClient(SOCKET clientSocket);                                          // Metoda za prosledjivanje primljene poruke klijentu
+    void forwardToServer(SOCKET serverSocket);     // šalje poruke drugom serveru
+    void handleClientConnection();                 // Metoda za rukovanje klijentom / accept
+    void handleServerConnection();                 // Metoda za konektovanje ka drugom serveru (outbound)
+    void receiveFromClient(SOCKET clientSocket);   // Metoda za primanje poruke od klijenta
+    void forwardToClient(SOCKET clientSocket);     // Metoda za prosledjivanje poruke klijentu
 
+    // Helpers
+    std::string GenerateMessageID();
+    bool isIncomingServerSocket(SOCKET sock, std::string& handshakeOut); // classify accepted socket
 
 public:
     Server(const std::string& serverAddress, int port, bool connectToOtherServer = false, size_t threadPoolSize = 8);
     ~Server();
 
-    // Metoda za slanje poruka u red
+    // Metoda za slanje poruka u red (message queue service)
     void SendToQueue(const std::string& queueName, const std::string& message);
 
     void StartServerConnection();
-
 
     // Start i stop servera
     void start();
@@ -54,4 +61,3 @@ public:
 };
 
 #endif // SERVER_H
-

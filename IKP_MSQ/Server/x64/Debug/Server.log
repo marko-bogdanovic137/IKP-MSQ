@@ -1,3 +1,2 @@
 ﻿  Server.cpp
-E:\Fakultet\IKP\IKP_MSQ\Server\Server.cpp(135,10): warning C4101: 'buf': unreferenced local variable
   Server.vcxproj -> E:\Fakultet\IKP\IKP_MSQ\x64\Debug\Server.exe

@@ -5,6 +5,7 @@
 #include <ws2tcpip.h>
 #include <thread>
 #include <chrono>
+#include <algorithm>
 #include "../IKP_MSQ/ThreadPool.h"
 #include "../IKP_MSQ/ConcreteMessageQueueService.h"
 
@@ -73,24 +74,50 @@ static bool recvMessage(SOCKET sock, std::string& out) {
 //////////
 
 void receiveMessages(SOCKET clientSocket) {
-    try {
-        while (running) {
-            std::string msg;
-            if (!recvMessage(clientSocket, msg)) {
-                std::cerr << "\nDisconnected from server or error." << std::endl;
-                running = false;
-                break;
-            }
-            // prikaz
-            std::cout << "\n[" << FRIEND << "]: " << msg << std::endl;
-            std::cout << "(type 'exit' to quit) [Me]: ";
+    while (running) {
+        std::string msg;
+        if (!recvMessage(clientSocket, msg)) {
+            std::cerr << "\nDisconnected from server." << std::endl;
+            running = false;
+            break;
         }
-    }
-    catch (const std::exception& ex) {
-        std::cerr << "[EXCEPTION] receiveMessages: " << ex.what() << std::endl;
-        running = false;
+
+        if (msg.empty()) continue; // ignoriši prazne frame-ove
+
+        if (msg.rfind("ACK|", 0) == 0) {
+            std::cout << "\n[DEBUG] (client) Ignored server ACK: " << msg << std::endl;
+            continue;
+        }
+
+        size_t firstSep = msg.find('|');
+        if (firstSep != std::string::npos) {
+            std::string firstTok = msg.substr(0, firstSep);
+            bool firstIsNumeric = !firstTok.empty() &&
+                std::all_of(firstTok.begin(), firstTok.end(), [](unsigned char c) { return std::isdigit(c); });
+
+            if (firstIsNumeric) {
+                size_t secondSep = msg.find('|', firstSep + 1);
+                if (secondSep != std::string::npos) {
+                    std::string secondTok = msg.substr(firstSep + 1, secondSep - (firstSep + 1));
+                    if (secondTok == "CLIENT") {
+                        size_t thirdSep = msg.find('|', secondSep + 1);
+                        if (thirdSep != std::string::npos) {
+                            std::string ip = msg.substr(secondSep + 1, thirdSep - (secondSep + 1));
+                            std::string payload = msg.substr(thirdSep + 1);
+                            std::cout << "\n[" << FRIEND << "]: " << payload << std::endl;
+                            continue;
+                        }
+                    }
+                }
+            }
+        }
+
+        // fallback: normal message
+        std::cout << "\n" << msg << std::endl;
     }
 }
+
+
 
 
 void sendMessages(SOCKET clientSocket, const std::string& myIp) {
